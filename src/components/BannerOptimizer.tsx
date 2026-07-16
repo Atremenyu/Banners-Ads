@@ -1,0 +1,810 @@
+import React, { useState, useCallback } from 'react';
+import {
+  Button, Card, CardContent, CardHeader, Typography, Chip, LinearProgress, Slider,
+  Container, Grid, Box, Paper, Snackbar, Alert, CircularProgress, TextField
+} from '@mui/material';
+import {
+  UploadFile as UploadFileIcon,
+  Download as DownloadIcon,
+  CheckCircle as CheckCircleIcon,
+  Error as ErrorIcon,
+  Image as ImageIcon,
+  Bolt as ZapIcon,
+  Archive as ArchiveIcon,
+  TrendingDown as TrendingDownIcon,
+  CompareArrows as CompareArrowsIcon,
+} from '@mui/icons-material';
+import JSZip from 'jszip';
+import AdPlaceholder from './AdPlaceholder';
+
+const getFileExtension = (mimeType: string) => {
+  switch (mimeType) {
+    case 'image/png': return 'png';
+    case 'image/webp': return 'webp';
+    case 'image/jpeg':
+    default: return 'jpeg';
+  }
+};
+
+const formatSize = (bytes: number) => {
+  if (bytes >= 1024 * 1024) {
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+  return (bytes / 1024).toFixed(1) + ' KB';
+};
+
+interface BannerFormat {
+  name: string;
+  width: number;
+  height: number;
+  aspectRatio: number;
+  useCase: string;
+}
+
+interface ProcessedFile {
+  id: string;
+  originalFile: File;
+  status: 'queued' | 'processing' | 'completed' | 'error';
+  progress: number;
+  optimizedBlob?: Blob;
+  originalSize: number;
+  optimizedSize?: number;
+  selectedFormat?: BannerFormat;
+  errorMessage?: string;
+  outputFilename: string;
+}
+
+const bannerFormats: BannerFormat[] = [
+    { name: 'Banner 600x500', width: 600, height: 500, aspectRatio: 1.2, useCase: 'Banner Cuadrado Estándar' },
+    { name: 'Banner 640x200', width: 640, height: 200, aspectRatio: 3.2, useCase: 'Banner Rectangular Horizontal' },
+    { name: 'Banner 728x90', width: 728, height: 90, aspectRatio: 8.09, useCase: 'Banner Leaderboard Horizontal' },
+    { name: 'Banner 420x200', width: 420, height: 200, aspectRatio: 2.1, useCase: 'Banner Horizontal Mediano' },
+    { name: 'Banner 1100x361', width: 1100, height: 361, aspectRatio: 3.05, useCase: 'Banner de Cabecera Grande' },
+    { name: 'Banner 630x250', width: 630, height: 250, aspectRatio: 2.52, useCase: 'Banner de Contenido Ancho' }
+];
+
+const DropZone: React.FC<{
+  onFilesSelected: (files: File[]) => void;
+  isDragOver: boolean;
+  setIsDragOver: (isDragOver: boolean) => void;
+  showToast: (message: string, severity: 'success' | 'error') => void;
+}> = ({ onFilesSelected, isDragOver, setIsDragOver, showToast }) => {
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    const files = Array.from(e.dataTransfer.files).filter(file => {
+      if (!file.type.startsWith('image/')) {
+        showToast(`${file.name} no es un archivo de imagen`, 'error');
+        return false;
+      }
+      return true;
+    });
+    
+    if (files.length > 0) {
+      onFilesSelected(files);
+    }
+  }, [onFilesSelected, setIsDragOver, showToast]);
+
+  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      onFilesSelected(files);
+    }
+  }, [onFilesSelected]);
+
+  return (
+    <Paper
+      variant="outlined"
+      onDrop={handleDrop}
+      onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+      onDragLeave={() => setIsDragOver(false)}
+      sx={{
+        p: 4,
+        textAlign: 'center',
+        borderStyle: 'dashed',
+        borderWidth: 2,
+        borderColor: isDragOver ? 'primary.main' : 'divider',
+        backgroundColor: isDragOver ? 'action.hover' : 'background.paper',
+        transition: 'all 0.3s ease',
+        transform: isDragOver ? 'scale(1.05)' : 'scale(1)',
+      }}
+    >
+      <UploadFileIcon sx={{ fontSize: 64, mb: 2, color: 'primary.main' }} />
+      <Typography variant="h5" component="h3" sx={{ mb: 1 }}>
+        Arrastra tus imágenes aquí
+      </Typography>
+      <Typography color="text.secondary" sx={{ mb: 2 }}>
+        Arrastra y suelta tus imágenes o haz clic para buscar. Las optimizaremos automáticamente para formatos de banner.
+      </Typography>
+      <Button
+        variant="contained"
+        component="label"
+        startIcon={<ImageIcon />}
+      >
+        Seleccionar Archivos
+        <input
+          id="file-input"
+          type="file"
+          multiple
+          accept="image/*"
+          hidden
+          onChange={handleFileInput}
+        />
+      </Button>
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+        Formatos soportados: PNG, JPG, GIF, WebP, BMP
+      </Typography>
+    </Paper>
+  );
+};
+
+const getStatusIcon = (status: ProcessedFile['status']) => {
+    switch (status) {
+        case 'queued':
+            return <ImageIcon />;
+        case 'processing':
+            return <CircularProgress size={24} color="inherit" />;
+        case 'completed':
+            return <CheckCircleIcon />;
+        case 'error':
+            return <ErrorIcon />;
+    }
+};
+
+const getStatusColor = (status: ProcessedFile['status']) => {
+    switch (status) {
+        case 'queued':
+            return 'grey.500';
+        case 'processing':
+            return 'primary.main';
+        case 'completed':
+            return 'success.main';
+        case 'error':
+            return 'error.main';
+    }
+};
+
+const FileProcessor: React.FC<{
+  file: ProcessedFile;
+  onOutputFilenameChange: (fileId: string, newFilename: string) => void;
+}> = ({ file, onOutputFilenameChange }) => {
+
+  return (
+    <Card sx={{ border: file.status === 'completed' ? '1px solid rgba(144, 202, 249, 0.2)' : 'none' }}>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Box sx={{
+            width: 40,
+            height: 40,
+            borderRadius: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: 'primary.contrastText',
+            bgcolor: getStatusColor(file.status)
+          }}>
+            {getStatusIcon(file.status)}
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography noWrap sx={{ fontWeight: 600 }}>{file.originalFile.name}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {formatSize(file.originalSize)}
+              {file.optimizedSize && (
+                <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, ml: 1, color: 'success.main', fontWeight: 500 }}>
+                  <CompareArrowsIcon fontSize="inherit" />
+                  {formatSize(file.optimizedSize)}
+                </Box>
+              )}
+            </Typography>
+          </Box>
+          {file.selectedFormat && (
+            <Chip label={file.selectedFormat.name} size="small" variant="outlined" color="primary" />
+          )}
+        </Box>
+
+        {file.status === 'queued' && (
+          <Box>
+            <TextField
+              fullWidth
+              label="Nombre de archivo de salida"
+              value={file.outputFilename}
+              onChange={(e) => onOutputFilenameChange(file.id, e.target.value)}
+              variant="outlined"
+              size="small"
+              sx={{ mb: 1 }}
+            />
+            <Typography variant="caption" color="text.secondary">
+              Listo para ser optimizado.
+            </Typography>
+          </Box>
+        )}
+        
+        {file.status === 'processing' && (
+          <Box>
+            <LinearProgress variant="determinate" value={file.progress} />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>Procesando... {file.progress}%</Typography>
+          </Box>
+        )}
+        
+        {file.status === 'error' && (
+          <Alert severity="error">{file.errorMessage}</Alert>
+        )}
+        
+        {file.status === 'completed' && file.optimizedBlob && file.optimizedSize && (
+          <Box sx={{ mt: 2 }}>
+            <Alert severity="success" icon={<CheckCircleIcon />} sx={{ mb: 2 }}>
+              ¡Banner optimizado con éxito! El archivo está listo para descargar.
+            </Alert>
+            
+            {/* Side-by-side stats comparison cards */}
+            <Grid container spacing={1.5} sx={{ mb: 2 }}>
+              <Grid item xs={12} sm={4}>
+                <Box sx={{ 
+                  p: 1.5, 
+                  bgcolor: 'rgba(255, 255, 255, 0.02)', 
+                  borderRadius: 1.5, 
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  borderLeft: '4px solid #757575',
+                  height: '100%'
+                }}>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textTransform: 'uppercase', fontWeight: 600, letterSpacing: 0.5 }}>
+                    Tamaño Original
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', mt: 0.5 }}>
+                    {formatSize(file.originalSize)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                    100% de peso
+                  </Typography>
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                <Box sx={{ 
+                  p: 1.5, 
+                  bgcolor: 'rgba(144, 202, 249, 0.05)', 
+                  borderRadius: 1.5, 
+                  border: '1px solid rgba(144, 202, 249, 0.1)',
+                  borderLeft: '4px solid #90caf9',
+                  height: '100%'
+                }}>
+                  <Typography variant="caption" color="primary.main" sx={{ display: 'block', textTransform: 'uppercase', fontWeight: 600, letterSpacing: 0.5 }}>
+                    Tamaño Optimizado
+                  </Typography>
+                  <Typography variant="h6" color="primary.main" sx={{ fontWeight: 'bold', mt: 0.5 }}>
+                    {formatSize(file.optimizedSize)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                    {((file.optimizedSize / file.originalSize) * 100).toFixed(1)}% del peso original
+                  </Typography>
+                </Box>
+              </Grid>
+
+              <Grid item xs={12} sm={4}>
+                {(() => {
+                  const savedBytes = file.originalSize - file.optimizedSize;
+                  const savedPercent = ((savedBytes / file.originalSize) * 100).toFixed(1);
+                  return (
+                    <Box sx={{ 
+                      p: 1.5, 
+                      bgcolor: 'rgba(102, 187, 106, 0.08)', 
+                      borderRadius: 1.5, 
+                      border: '1px solid rgba(102, 187, 106, 0.15)',
+                      borderLeft: '4px solid #66bb6a',
+                      height: '100%'
+                    }}>
+                      <Typography variant="caption" color="success.main" sx={{ display: 'block', textTransform: 'uppercase', fontWeight: 600, letterSpacing: 0.5 }}>
+                        Reducción de Peso
+                      </Typography>
+                      <Typography variant="h6" color="success.main" sx={{ fontWeight: 'bold', mt: 0.5 }}>
+                        -{savedPercent}%
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                        Ahorraste {formatSize(savedBytes)}
+                      </Typography>
+                    </Box>
+                  );
+                })()}
+              </Grid>
+            </Grid>
+
+            {/* Visual dual bar track */}
+            <Box sx={{ bgcolor: 'rgba(255, 255, 255, 0.01)', p: 2, borderRadius: 2, border: '1px solid rgba(255, 255, 255, 0.03)', mb: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1, alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500 }}>Comparación de Capacidad</Typography>
+                <Typography variant="caption" color="success.main" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <TrendingDownIcon fontSize="inherit" />
+                  {formatSize(file.originalSize - file.optimizedSize)} menos en disco
+                </Typography>
+              </Box>
+              <Box sx={{ position: 'relative', height: 16, bgcolor: 'rgba(255,255,255,0.06)', borderRadius: 1.5, overflow: 'hidden' }}>
+                {/* Original Track represented by grey background width 100% */}
+                <Box 
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 0, 
+                    left: 0, 
+                    height: '100%', 
+                    width: '100%', 
+                    bgcolor: 'grey.800', 
+                    opacity: 0.35 
+                  }} 
+                />
+                {/* Optimized size segment */}
+                <Box 
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 0, 
+                    left: 0, 
+                    height: '100%', 
+                    width: `${Math.max(3, Math.min(100, (file.optimizedSize / file.originalSize) * 100))}%`, 
+                    bgcolor: 'primary.main',
+                    borderRadius: '6px 0 0 6px',
+                    boxShadow: '0 0 8px rgba(144, 202, 249, 0.3)'
+                  }} 
+                />
+                {/* Space saved highlighted in green */}
+                <Box 
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 0, 
+                    left: `${(file.optimizedSize / file.originalSize) * 100}%`, 
+                    height: '100%', 
+                    width: `${((file.originalSize - file.optimizedSize) / file.originalSize) * 100}%`, 
+                    bgcolor: 'success.main',
+                    opacity: 0.25,
+                    borderLeft: '1px solid rgba(255, 255, 255, 0.2)'
+                  }} 
+                />
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Peso optimizado: <strong>{((file.optimizedSize / file.originalSize) * 100).toFixed(0)}%</strong>
+                </Typography>
+                <Typography variant="caption" color="success.main" sx={{ fontWeight: 500 }}>
+                  Reducido: <strong>{(((file.originalSize - file.optimizedSize) / file.originalSize) * 100).toFixed(0)}%</strong>
+                </Typography>
+              </Box>
+            </Box>
+
+            <Button
+              fullWidth
+              variant="contained"
+              color="success"
+              startIcon={<DownloadIcon />}
+              sx={{ py: 1.2, fontWeight: 'bold' }}
+              onClick={() => {
+                const url = URL.createObjectURL(file.optimizedBlob!);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.outputFilename.toLowerCase();
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Descargar Banner Optimizado ({formatSize(file.optimizedSize)})
+            </Button>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const findBestFormat = (width: number, height: number): BannerFormat => {
+  const aspectRatio = width / height;
+  return bannerFormats.reduce((best, format) => {
+    const currentDiff = Math.abs(aspectRatio - format.aspectRatio);
+    const bestDiff = Math.abs(aspectRatio - best.aspectRatio);
+    return currentDiff < bestDiff ? format : best;
+  });
+};
+
+const BannerOptimizer: React.FC = () => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [files, setFiles] = useState<ProcessedFile[]>([]);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+    open: false,
+    message: '',
+    severity: 'success'
+  });
+
+  const showToast = useCallback((message: string, severity: 'success' | 'error') => {
+    setSnackbar({ open: true, message, severity });
+  }, []);
+
+  const optimizeImage = useCallback(async (file: File, quality: number): Promise<{ blob: Blob; size: number; format: BannerFormat }> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return reject(new Error('Canvas context not available'));
+
+      img.onload = () => {
+        const selectedFormat = findBestFormat(img.width, img.height);
+        canvas.width = selectedFormat.width;
+        canvas.height = selectedFormat.height;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, selectedFormat.width, selectedFormat.height);
+        const outputType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ? file.type : 'image/jpeg';
+        canvas.toBlob((blob) => {
+          if (!blob) return reject(new Error('Failed to create optimized blob'));
+          resolve({ blob, size: blob.size, format: selectedFormat });
+        }, outputType, quality / 100);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  }, []);
+
+  const handleOutputFilenameChange = useCallback((fileId: string, newFilename: string) => {
+    setFiles(prev => prev.map(f =>
+      f.id === fileId
+        ? { ...f, outputFilename: newFilename }
+        : f
+    ));
+  }, []);
+
+  const addFilesToQueue = useCallback((newFiles: File[]) => {
+    const filesToQueue: ProcessedFile[] = newFiles.map(file => ({
+      id: Math.random().toString(36),
+      originalFile: file,
+      status: 'queued' as const,
+      progress: 0,
+      originalSize: file.size,
+      outputFilename: 'Loading...'
+    }));
+
+    setFiles(prev => [...prev, ...filesToQueue]);
+
+    filesToQueue.forEach(fileToQueue => {
+      const img = new Image();
+      img.onload = () => {
+        const selectedFormat = findBestFormat(img.width, img.height);
+        const extension = getFileExtension(fileToQueue.originalFile.type);
+        const baseName = fileToQueue.originalFile.name.substring(0, fileToQueue.originalFile.name.lastIndexOf('.'));
+        const defaultFilename = `${baseName}_${selectedFormat.width}x${selectedFormat.height}.${extension}`.toLowerCase();
+
+        setFiles(prev => prev.map(f =>
+          f.id === fileToQueue.id
+            ? {
+                ...f,
+                selectedFormat: selectedFormat,
+                outputFilename: defaultFilename
+              }
+            : f
+        ));
+        URL.revokeObjectURL(img.src);
+      };
+      img.onerror = () => {
+        setFiles(prev => prev.map(f =>
+          f.id === fileToQueue.id
+            ? { ...f, status: 'error', errorMessage: 'Error al leer las dimensiones de la imagen.' }
+            : f
+        ));
+        URL.revokeObjectURL(img.src);
+      };
+      img.src = URL.createObjectURL(fileToQueue.originalFile);
+    });
+  }, []);
+
+  const startAllProcessing = useCallback(async () => {
+    const filesToProcess = files.filter(f => f.status === 'queued');
+
+    setFiles(prev => prev.map(f =>
+      f.status === 'queued' ? { ...f, status: 'processing' } : f
+    ));
+
+    for (const fileToProcess of filesToProcess) {
+      try {
+        const progressInterval = setInterval(() => {
+          setFiles(prev => prev.map(f =>
+            f.id === fileToProcess.id
+              ? { ...f, progress: Math.min(f.progress + 10, 90) }
+              : f
+          ));
+        }, 200);
+
+        const result = await optimizeImage(fileToProcess.originalFile, 90);
+        clearInterval(progressInterval);
+
+        setFiles(prev => prev.map(f =>
+          f.id === fileToProcess.id
+            ? {
+                ...f,
+                status: 'completed' as const,
+                progress: 100,
+                optimizedBlob: result.blob,
+                optimizedSize: result.size,
+                selectedFormat: result.format
+              }
+            : f
+        ));
+      showToast(`${fileToProcess.outputFilename} optimizado con éxito`, 'success');
+      } catch (error) {
+        setFiles(prev => prev.map(f =>
+          f.id === fileToProcess.id
+            ? {
+                ...f,
+                status: 'error' as const,
+              errorMessage: error instanceof Error ? error.message : 'Error en el procesamiento'
+              }
+            : f
+        ));
+      showToast(`Error al procesar ${fileToProcess.outputFilename}`, 'error');
+      }
+    }
+  }, [files, optimizeImage, showToast]);
+
+  const downloadAllFiles = useCallback(async () => {
+    const completedFiles = files.filter(f => f.status === 'completed' && f.optimizedBlob);
+    if (completedFiles.length === 0) {
+      showToast("No hay archivos para descargar. Procesa algunas imágenes primero.", 'error');
+      return;
+    }
+
+    const zip = new JSZip();
+    for (const file of completedFiles) {
+      if (file.optimizedBlob && file.selectedFormat) {
+        zip.file(file.outputFilename.toLowerCase(), file.optimizedBlob);
+      }
+    }
+
+    try {
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `banners_optimizados_${new Date().toISOString().split('T')[0]}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Se descargaron ${completedFiles.length} archivos optimizados`, 'success');
+    } catch (error) {
+      showToast("No se pudo crear el archivo ZIP.", 'error');
+    }
+  }, [files, showToast]);
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4, position: 'relative' }}>
+      {/* Anuncios Laterales (Escritorio) */}
+      <Box sx={{
+        display: { xs: 'none', xl: 'block' },
+        position: 'fixed',
+        left: '20px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        zIndex: 10
+      }}>
+        <AdPlaceholder type="vertical" label="Lateral Izquierdo" />
+      </Box>
+
+      <Box sx={{
+        display: { xs: 'none', xl: 'block' },
+        position: 'fixed',
+        right: '20px',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        zIndex: 10
+      }}>
+        <AdPlaceholder type="vertical" label="Lateral Derecho" />
+      </Box>
+
+      <Box sx={{ textAlign: 'center', mb: 8 }}>
+        <Chip icon={<ZapIcon />} label="Banner Optimizer" color="primary" sx={{ mb: 2 }} />
+        <Typography variant="h3" component="h1" gutterBottom>
+          Optimiza Imágenes para Banners Perfectos
+        </Typography>
+        <Typography variant="h6" color="text.secondary" component="p" sx={{ maxWidth: 'md', mx: 'auto' }}>
+          Sube tus imágenes y las convertiremos automáticamente a formatos de banner estándar
+          con tamaños de archivo optimizados para uso web.
+        </Typography>
+
+        {/* Anuncio Horizontal Superior (Móvil y Escritorio) */}
+        <AdPlaceholder type="horizontal" label="Superior" />
+      </Box>
+
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {bannerFormats.map((format) => (
+          <Grid item xs={12} sm={6} md={4} key={format.name}>
+            <Card sx={{ textAlign: 'center' }}>
+              <CardHeader title={format.name} subheader={format.useCase} />
+              <CardContent>
+                <Typography variant="h4" color="primary">{format.width}×{format.height}</Typography>
+                <Typography variant="body2" color="text.secondary">Ratio: {format.aspectRatio.toFixed(2)}:1</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Box sx={{ mb: 4 }}>
+        <DropZone
+          onFilesSelected={addFilesToQueue}
+          isDragOver={isDragOver}
+          setIsDragOver={setIsDragOver}
+          showToast={showToast}
+        />
+      </Box>
+
+      {files.length > 0 && (() => {
+        const completedFiles = files.filter(f => f.status === 'completed' && f.optimizedSize);
+        const totalOriginalSize = completedFiles.reduce((sum, f) => sum + f.originalSize, 0);
+        const totalOptimizedSize = completedFiles.reduce((sum, f) => sum + (f.optimizedSize || 0), 0);
+        const totalSavedSize = totalOriginalSize - totalOptimizedSize;
+        const totalSavedPercent = totalOriginalSize > 0 ? ((totalSavedSize / totalOriginalSize) * 100).toFixed(1) : '0';
+
+        return (
+          <Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h5">
+                {files.some(f => f.status === 'queued') ? 'Cola de Archivos' : 'Resultados del Procesamiento'}
+              </Typography>
+              <Box>
+                {files.some(f => f.status === 'queued') && (
+                  <Button
+                    onClick={startAllProcessing}
+                    variant="contained"
+                    color="primary"
+                    startIcon={<ZapIcon />}
+                  >
+                    Optimizar Todo ({files.filter(f => f.status === 'queued').length})
+                  </Button>
+                )}
+                {files.filter(f => f.status === 'completed').length > 1 && (
+                  <Button
+                    onClick={downloadAllFiles}
+                    variant="contained"
+                    startIcon={<ArchiveIcon />}
+                    sx={{ ml: 2 }}
+                  >
+                    Descargar Todo ({files.filter(f => f.status === 'completed').length})
+                  </Button>
+                )}
+              </Box>
+            </Box>
+
+            {/* Consolidated Optimization Summary Dashboard */}
+            {completedFiles.length > 0 && (
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  p: 3, 
+                  mb: 4, 
+                  background: 'linear-gradient(135deg, rgba(30, 30, 30, 0.6) 0%, rgba(18, 18, 18, 0.8) 100%)',
+                  borderColor: 'success.dark',
+                  borderRadius: 3,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+                }}
+              >
+                <Grid container spacing={3} alignItems="center">
+                  <Grid item xs={12} md={5} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                    <Typography variant="h6" color="success.main" sx={{ display: 'flex', alignItems: 'center', justifyContent: { xs: 'center', md: 'flex-start' }, gap: 1, mb: 1, fontWeight: 'bold' }}>
+                      <ZapIcon /> ¡Resumen de Optimización Global!
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Has optimizado con éxito un total de <strong>{completedFiles.length}</strong> {completedFiles.length === 1 ? 'banner' : 'banners'}. Se ha reducido significativamente el peso total para asegurar cargas ultrarrápidas de tus páginas.
+                    </Typography>
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">Peso Original Total:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatSize(totalOriginalSize)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">Peso Optimizado Total:</Typography>
+                      <Typography variant="body2" color="primary.main" sx={{ fontWeight: 600 }}>{formatSize(totalOptimizedSize)}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px dashed rgba(255,255,255,0.1)', pt: 1, mt: 1 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold' }} color="success.main">Espacio Total Liberado:</Typography>
+                      <Typography variant="body2" color="success.main" sx={{ fontWeight: 'bold' }}>
+                        {formatSize(totalSavedSize)} (-{totalSavedPercent}%)
+                      </Typography>
+                    </Box>
+                  </Grid>
+
+                  <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                    <Box sx={{ position: 'relative', display: 'inline-flex', mb: 1 }}>
+                      <CircularProgress 
+                        variant="determinate" 
+                        value={parseFloat(totalSavedPercent)} 
+                        color="success" 
+                        size={80} 
+                        thickness={5}
+                      />
+                      <Box
+                        sx={{
+                          top: 0,
+                          left: 0,
+                          bottom: 0,
+                          right: 0,
+                          position: 'absolute',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <Typography variant="body2" component="div" color="success.main" sx={{ fontWeight: 'bold' }}>
+                          -{parseFloat(totalSavedPercent).toFixed(0)}%
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" align="center">
+                      Reducción de Peso Promedio
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Paper>
+            )}
+
+            <Grid container spacing={2}>
+              {files.map((file) => (
+                <Grid item xs={12} key={file.id}>
+                  <FileProcessor file={file} onOutputFilenameChange={handleOutputFilenameChange} />
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        );
+      })()}
+
+      {/* Sección informativa adicional para cumplimiento de AdSense */}
+      <Box sx={{ mt: 12, mb: 8 }}>
+        <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4 }}>
+          ¿Cómo funciona Banner Optimizer?
+        </Typography>
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
+              <Typography variant="h6" gutterBottom color="primary">Privacidad Total</Typography>
+              <Typography variant="body2" color="text.secondary">
+                A diferencia de otros optimizadores, tus imágenes nunca se suben a un servidor. Todo el procesamiento (redimensionamiento y compresión) ocurre localmente en tu navegador. Tus archivos privados permanecen privados.
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
+              <Typography variant="h6" gutterBottom color="primary">Formatos Inteligentes</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Nuestra herramienta detecta automáticamente la mejor relación de aspecto para tu imagen y te sugiere los formatos de banner más adecuados, desde leaderboards hasta rectángulos medianos, optimizando el espacio visual.
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
+              <Typography variant="h6" gutterBottom color="primary">Optimizado para Web</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Generamos archivos ligeros que cumplen con los estándares de velocidad de Google (Core Web Vitals). Mejora el SEO de tu sitio web reduciendo el tiempo de carga de tus elementos visuales sin perder calidad perceptible.
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
+
+      {/* Anuncio Horizontal Inferior (Móvil y Escritorio) */}
+      <Box sx={{ mt: 8 }}>
+        <AdPlaceholder type="horizontal" label="Inferior" />
+      </Box>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Container>
+  );
+};
+
+export default BannerOptimizer;
