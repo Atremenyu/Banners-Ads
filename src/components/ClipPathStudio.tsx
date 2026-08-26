@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import AdPlaceholder from './AdPlaceholder';
+import AdPlaceholder, { LateralAds } from './AdPlaceholder';
 import {
   Container, Typography, Box, Paper, Grid, Button,
   Chip, Snackbar, Alert, Slider, FormControl, InputLabel, Select, MenuItem, Tab, Tabs, Switch, FormControlLabel
@@ -87,13 +87,8 @@ box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);`;
 
   return (
     <Container maxWidth="xl" sx={{ py: 4, position: 'relative' }}>
-      {/* Lateral Fixed Ads */}
-      <Box sx={{ display: { xs: 'none', xl: 'block' }, position: 'fixed', left: '20px', top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}>
-        <AdPlaceholder type="vertical" label="Lateral Izquierdo" />
-      </Box>
-      <Box sx={{ display: { xs: 'none', xl: 'block' }, position: 'fixed', right: '20px', top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}>
-        <AdPlaceholder type="vertical" label="Lateral Derecho" />
-      </Box>
+      {/* Safe Lateral Ads */}
+      <LateralAds />
 
       {/* Header */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
-import AdPlaceholder from './AdPlaceholder';
+import AdPlaceholder, { LateralAds } from './AdPlaceholder';
 import {
   Container, Typography, Box, Paper, Grid, Button,
   IconButton, Chip, Snackbar, Alert, Card, CardContent, Divider, Tab, Tabs, TextField
@@ -228,28 +228,8 @@ const ColorStudio = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4, position: 'relative' }}>
-      {/* Lateral Fixed Ads (XL screens) */}
-      <Box sx={{
-        display: { xs: 'none', xl: 'block' },
-        position: 'fixed',
-        left: '20px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 10
-      }}>
-        <AdPlaceholder type="vertical" label="Lateral Izquierdo" />
-      </Box>
-
-      <Box sx={{
-        display: { xs: 'none', xl: 'block' },
-        position: 'fixed',
-        right: '20px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 10
-      }}>
-        <AdPlaceholder type="vertical" label="Lateral Derecho" />
-      </Box>
+      {/* Safe Lateral Ads */}
+      <LateralAds />
 
       {/* Title */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>

@@ -165,8 +165,8 @@ const Header = () => {
             </Box>
           </Box>
 
-          {/* Desktop Categorized Dropdowns */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+          {/* Desktop Categorized Dropdowns - Visible on lg screens and up to prevent overflow */}
+          <Box sx={{ display: { xs: 'none', lg: 'flex' }, alignItems: 'center', gap: 0.75 }}>
             {categories.map((cat) => {
               const isCatActive = cat.items.some(item => item.path === location.pathname);
               const anchorEl = anchorEls[cat.id];
@@ -177,14 +177,15 @@ const Header = () => {
                   <Button
                     onClick={(e) => handleMenuOpen(cat.id, e)}
                     startIcon={cat.icon}
-                    endIcon={<ArrowDownIcon sx={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />}
+                    endIcon={<ArrowDownIcon sx={{ fontSize: 18, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />}
                     sx={{
-                      px: 1.75,
-                      py: 0.75,
+                      px: 1.5,
+                      py: 0.7,
                       borderRadius: 2,
                       textTransform: 'none',
                       fontWeight: isCatActive ? 700 : 500,
-                      fontSize: '0.875rem',
+                      fontSize: '0.84rem',
+                      whiteSpace: 'nowrap',
                       color: isCatActive ? 'primary.main' : 'text.primary',
                       bgcolor: isCatActive ? 'rgba(59, 130, 246, 0.12)' : 'transparent',
                       border: '1px solid',
@@ -205,7 +206,7 @@ const Header = () => {
                       elevation: 8,
                       sx: {
                         mt: 1,
-                        width: 310,
+                        width: 320,
                         p: 1,
                         bgcolor: '#131c2e',
                         border: '1px solid rgba(255, 255, 255, 0.1)',
@@ -265,7 +266,7 @@ const Header = () => {
             })}
           </Box>
 
-          {/* Quick Active Badge or Mobile Trigger */}
+          {/* Right Side: Active Badge & Hamburger Trigger */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {activeTool && (
               <Chip
@@ -274,149 +275,159 @@ const Header = () => {
                 variant="outlined"
                 color="primary"
                 size="small"
-                sx={{ display: { xs: 'none', sm: 'inline-flex', lg: 'none' }, fontWeight: 700, height: 26, fontSize: '0.75rem' }}
+                sx={{
+                  display: { xs: 'none', sm: 'inline-flex', xl: 'none' },
+                  fontWeight: 700,
+                  height: 26,
+                  fontSize: '0.75rem',
+                  maxWidth: 180
+                }}
               />
             )}
 
+            {/* Hamburger Button for screens below lg (<1200px) */}
             <IconButton
               color="inherit"
-              aria-label="open menu"
+              aria-label="Abrir menú de herramientas"
               edge="end"
               onClick={handleDrawerToggle}
-              sx={{ display: { md: 'none' } }}
+              sx={{
+                display: { lg: 'none' },
+                bgcolor: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: 2,
+                p: 0.75,
+                '&:hover': { bgcolor: 'rgba(59, 130, 246, 0.15)' }
+              }}
             >
-              <MenuIcon />
+              <MenuIcon sx={{ fontSize: 22 }} />
             </IconButton>
           </Box>
         </Toolbar>
-
-        {/* Horizontal Quick Pill Bar (Desktop) */}
-        <Box
-          sx={{
-            display: { xs: 'none', md: 'flex' },
-            alignItems: 'center',
-            gap: 0.75,
-            py: 0.75,
-            overflowX: 'auto',
-            borderTop: '1px solid rgba(255, 255, 255, 0.05)',
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': { display: 'none' }
-          }}
-        >
-          {categories.flatMap(c => c.items).map((item) => {
-            const isActive = location.pathname === item.path;
-            return (
-              <Chip
-                key={item.path}
-                component={RouterLink}
-                to={item.path}
-                clickable
-                label={item.label}
-                size="small"
-                variant={isActive ? 'filled' : 'outlined'}
-                color={isActive ? 'primary' : 'default'}
-                sx={{
-                  fontWeight: isActive ? 700 : 500,
-                  fontSize: '0.725rem',
-                  height: 24,
-                  borderColor: isActive ? 'primary.main' : 'rgba(255, 255, 255, 0.1)',
-                  bgcolor: isActive ? 'primary.main' : 'rgba(255, 255, 255, 0.02)',
-                  color: isActive ? '#fff' : 'text.secondary',
-                  '&:hover': {
-                    bgcolor: isActive ? 'primary.dark' : 'rgba(255, 255, 255, 0.08)',
-                    color: '#fff'
-                  }
-                }}
-              />
-            );
-          })}
-        </Box>
       </Container>
 
-      {/* Mobile Navigation Drawer */}
+      {/* Mobile & Tablet Navigation Drawer */}
       <Drawer
         anchor="right"
         open={mobileOpen}
         onClose={handleDrawerToggle}
         PaperProps={{
           sx: {
-            width: 300,
+            width: { xs: '85vw', sm: 340 },
+            maxWidth: 360,
             bgcolor: '#0b0f17',
-            p: 2
+            p: 2.5,
+            display: 'flex',
+            flexDirection: 'column'
           }
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, px: 1 }}>
-          <Box
-            sx={{
-              width: 30,
-              height: 30,
-              borderRadius: 1.5,
-              bgcolor: 'primary.main',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff'
-            }}
-          >
-            <AutoAwesomeIcon sx={{ fontSize: 18 }} />
-          </Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1.05rem' }}>
-            DesignKit Studio
-          </Typography>
-        </Box>
-        <Divider sx={{ mb: 2 }} />
-
-        <Stack spacing={2}>
-          {categories.map((cat) => (
-            <Box key={cat.id}>
-              <Typography variant="caption" color="primary" sx={{ fontWeight: 700, px: 1, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.68rem', display: 'flex', alignItems: 'center', gap: 0.5, mb: 1 }}>
-                {cat.icon} {cat.title}
-              </Typography>
-              <List disablePadding>
-                {cat.items.map((item) => {
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
-                      <ListItemButton
-                        component={RouterLink}
-                        to={item.path}
-                        onClick={() => setMobileOpen(false)}
-                        selected={isActive}
-                        sx={{
-                          borderRadius: 2,
-                          py: 0.75,
-                          '&.Mui-selected': {
-                            bgcolor: 'rgba(59, 130, 246, 0.18)',
-                          }
-                        }}
-                      >
-                        <ListItemIcon sx={{ color: isActive ? 'primary.main' : 'text.secondary', minWidth: 32 }}>
-                          {item.icon}
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={item.label}
-                          primaryTypographyProps={{
-                            fontWeight: isActive ? 700 : 500,
-                            fontSize: '0.85rem'
-                          }}
-                        />
-                        {item.badge && (
-                          <Chip
-                            label={item.badge}
-                            size="small"
-                            color={item.badge === 'Nuevo' ? 'success' : item.badge === 'Pro' ? 'primary' : 'default'}
-                            sx={{ height: 16, fontSize: '0.6rem' }}
-                          />
-                        )}
-                      </ListItemButton>
-                    </ListItem>
-                  );
-                })}
-              </List>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, px: 0.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+            <Box
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: 1.5,
+                bgcolor: 'primary.main',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff'
+              }}
+            >
+              <AutoAwesomeIcon sx={{ fontSize: 18 }} />
             </Box>
-          ))}
-        </Stack>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
+                Design<Box component="span" sx={{ color: 'primary.main' }}>Kit</Box> Studio
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                Suite Creativa Completa
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton onClick={handleDrawerToggle} size="small" sx={{ color: 'text.secondary' }}>
+            <MenuIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Box>
+        <Divider sx={{ mb: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+
+        <Box sx={{ flex: 1, overflowY: 'auto', pr: 0.5 }}>
+          <Stack spacing={2.5}>
+            {categories.map((cat) => (
+              <Box key={cat.id}>
+                <Typography variant="caption" color="primary.main" sx={{ fontWeight: 700, px: 1, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
+                  {cat.icon} {cat.title}
+                </Typography>
+                <List disablePadding>
+                  {cat.items.map((item) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                      <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+                        <ListItemButton
+                          component={RouterLink}
+                          to={item.path}
+                          onClick={() => setMobileOpen(false)}
+                          selected={isActive}
+                          sx={{
+                            borderRadius: 2,
+                            py: 0.85,
+                            px: 1.25,
+                            '&.Mui-selected': {
+                              bgcolor: 'rgba(59, 130, 246, 0.18)',
+                              border: '1px solid rgba(59, 130, 246, 0.3)'
+                            }
+                          }}
+                        >
+                          <ListItemIcon sx={{ color: isActive ? 'primary.main' : 'text.secondary', minWidth: 30 }}>
+                            {item.icon}
+                          </ListItemIcon>
+                          <ListItemText
+                            primary={item.label}
+                            secondary={item.desc}
+                            primaryTypographyProps={{
+                              fontWeight: isActive ? 700 : 500,
+                              fontSize: '0.85rem',
+                              color: isActive ? 'primary.main' : 'text.primary'
+                            }}
+                            secondaryTypographyProps={{
+                              fontSize: '0.7rem',
+                              lineHeight: 1.2,
+                              color: 'text.secondary',
+                              sx: { display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }
+                            }}
+                          />
+                          {item.badge && (
+                            <Chip
+                              label={item.badge}
+                              size="small"
+                              color={item.badge === 'Nuevo' ? 'success' : item.badge === 'Pro' ? 'primary' : 'default'}
+                              sx={{ height: 16, fontSize: '0.6rem', ml: 0.5 }}
+                            />
+                          )}
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </Box>
+            ))}
+          </Stack>
+        </Box>
+
+        <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', px: 1 }}>
+          <Button component={RouterLink} to="/guia" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.75rem', textTransform: 'none', color: 'text.secondary' }}>
+            Guía de Uso
+          </Button>
+          <Button component={RouterLink} to="/contacto" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.75rem', textTransform: 'none', color: 'text.secondary' }}>
+            Contacto
+          </Button>
+          <Button component={RouterLink} to="/privacidad" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.75rem', textTransform: 'none', color: 'text.secondary' }}>
+            Privacidad
+          </Button>
+        </Box>
       </Drawer>
     </AppBar>
   );

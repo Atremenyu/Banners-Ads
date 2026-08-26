@@ -15,7 +15,7 @@ import {
   CompareArrows as CompareArrowsIcon,
 } from '@mui/icons-material';
 import JSZip from 'jszip';
-import AdPlaceholder from './AdPlaceholder';
+import AdPlaceholder, { LateralAds } from './AdPlaceholder';
 
 const getFileExtension = (mimeType: string) => {
   switch (mimeType) {
@@ -573,28 +573,8 @@ const BannerOptimizer: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4, position: 'relative' }}>
-      {/* Anuncios Laterales (Escritorio) */}
-      <Box sx={{
-        display: { xs: 'none', xl: 'block' },
-        position: 'fixed',
-        left: '20px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 10
-      }}>
-        <AdPlaceholder type="vertical" label="Lateral Izquierdo" />
-      </Box>
-
-      <Box sx={{
-        display: { xs: 'none', xl: 'block' },
-        position: 'fixed',
-        right: '20px',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: 10
-      }}>
-        <AdPlaceholder type="vertical" label="Lateral Derecho" />
-      </Box>
+      {/* Anuncios Laterales Seguros */}
+      <LateralAds />
 
       <Box sx={{ textAlign: 'center', mb: 3 }}>
         <Chip icon={<ZapIcon />} label="Banner Optimizer" color="primary" size="small" sx={{ mb: 1, fontWeight: 700 }} />

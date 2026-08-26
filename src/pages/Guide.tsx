@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Head } from 'vite-react-ssg';
-import AdPlaceholder from '@/components/AdPlaceholder';
+import AdPlaceholder, { LateralAds } from '@/components/AdPlaceholder';
 import {
   Container, Typography, Box, Paper, Grid, Card, CardContent,
   Tabs, Tab, Chip, Divider, Button
@@ -357,28 +357,8 @@ const GuidePage = () => {
       </Head>
 
       <Container maxWidth="xl" sx={{ py: 4, position: 'relative' }}>
-        {/* Lateral Fixed Ads (XL screens) */}
-        <Box sx={{
-          display: { xs: 'none', xl: 'block' },
-          position: 'fixed',
-          left: '20px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 10
-        }}>
-          <AdPlaceholder type="vertical" label="Lateral Izquierdo" />
-        </Box>
-
-        <Box sx={{
-          display: { xs: 'none', xl: 'block' },
-          position: 'fixed',
-          right: '20px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 10
-        }}>
-          <AdPlaceholder type="vertical" label="Lateral Derecho" />
-        </Box>
+        {/* Safe Lateral Ads */}
+        <LateralAds />
 
         {/* Page Header */}
         <Box sx={{ mb: 3, textAlign: 'center' }}>
