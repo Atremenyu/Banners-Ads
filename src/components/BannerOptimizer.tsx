@@ -596,12 +596,12 @@ const BannerOptimizer: React.FC = () => {
         <AdPlaceholder type="vertical" label="Lateral Derecho" />
       </Box>
 
-      <Box sx={{ textAlign: 'center', mb: 8 }}>
-        <Chip icon={<ZapIcon />} label="Banner Optimizer" color="primary" sx={{ mb: 2 }} />
-        <Typography variant="h3" component="h1" gutterBottom>
-          Optimiza Imágenes para Banners Perfectos
+      <Box sx={{ textAlign: 'center', mb: 3 }}>
+        <Chip icon={<ZapIcon />} label="Banner Optimizer" color="primary" size="small" sx={{ mb: 1, fontWeight: 700 }} />
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 0.5, letterSpacing: -0.5 }}>
+          Optimiza Imágenes para Banners Web
         </Typography>
-        <Typography variant="h6" color="text.secondary" component="p" sx={{ maxWidth: 'md', mx: 'auto' }}>
+        <Typography variant="body2" color="text.secondary" component="p" sx={{ maxWidth: 640, mx: 'auto', opacity: 0.85 }}>
           Sube tus imágenes y las convertiremos automáticamente a formatos de banner estándar
           con tamaños de archivo optimizados para uso web.
         </Typography>

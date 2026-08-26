@@ -9,21 +9,61 @@ const Footer = () => {
         <Grid container spacing={4} justifyContent="space-between">
           <Grid item xs={12} sm={4}>
             <Typography variant="h6" color="primary" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Banner Optimizer
+              DesignKit Studio
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Herramienta profesional para la optimización y redimensionamiento de banners web de forma rápida, segura y gratuita. Todo el proceso ocurre en tu navegador.
+              Suite profesional de herramientas para creadores, diseñadores y marketeros. Optimización de imágenes, análisis de texto SEO y creador de URLs de campaña 100% en el cliente.
             </Typography>
           </Grid>
 
           <Grid item xs={6} sm={2}>
             <Typography variant="subtitle1" color="text.primary" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Herramienta
+              Herramientas
             </Typography>
             <Box component="ul" sx={{ listStyle: 'none', p: 0, m: 0 }}>
               <li>
                 <Link component={RouterLink} to="/" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
-                  Inicio
+                  Optimizador Banners
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/texto" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  TextLab & SEO
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/utm-builder" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  UTM Builder
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/color-studio" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  Color Studio
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/aspect-ratio" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  Ratio Calculator
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/qr-studio" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  QR Studio
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/gradient-studio" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  Gradient Studio
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/lorem-generator" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  LoremCraft
+                </Link>
+              </li>
+              <li>
+                <Link component={RouterLink} to="/shadow-studio" color="text.secondary" variant="body2" sx={{ textDecoration: 'none', '&:hover': { color: 'primary.main' } }}>
+                  Shadow Studio
                 </Link>
               </li>
               <li>
@@ -69,11 +109,11 @@ const Footer = () => {
 
         <Typography variant="body2" color="text.secondary" align="center">
           {'Copyright © '}
-          <Link color="inherit" href="/">
-            Banner Optimizer
+          <Link color="inherit" component={RouterLink} to="/">
+            DesignKit Studio
           </Link>{' '}
           {new Date().getFullYear()}
-          {'.'}
+          {'. Todos los derechos reservados.'}
         </Typography>
       </Container>
     </Box>

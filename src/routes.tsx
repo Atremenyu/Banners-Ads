@@ -1,41 +1,140 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { RouteRecord } from 'vite-react-ssg';
 import { Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
+import Header from './components/Header';
 import Footer from './components/Footer';
 
-import Index from "./pages/Index";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
-import TermsOfService from "./pages/TermsOfService";
-import Contact from "./pages/Contact";
-import Guide from "./pages/Guide";
-import NotFound from "./pages/NotFound";
+// Lazy load pages for dynamic code-splitting and smaller initial bundles
+const Index = lazy(() => import("./pages/Index"));
+const TextLabPage = lazy(() => import("./pages/TextLabPage"));
+const UtmPage = lazy(() => import("./pages/UtmPage"));
+const ColorStudioPage = lazy(() => import("./pages/ColorStudioPage"));
+const AspectRatioPage = lazy(() => import("./pages/AspectRatioPage"));
+const QrStudioPage = lazy(() => import("./pages/QrStudioPage"));
+const GradientStudioPage = lazy(() => import("./pages/GradientStudioPage"));
+const CopyGenPage = lazy(() => import("./pages/CopyGenPage"));
+const ShadowStudioPage = lazy(() => import("./pages/ShadowStudioPage"));
+const ButtonForgePage = lazy(() => import("./pages/ButtonForgePage"));
+const CardBuilderPage = lazy(() => import("./pages/CardBuilderPage"));
+const ClipPathPage = lazy(() => import("./pages/ClipPathPage"));
+const TypeScalePage = lazy(() => import("./pages/TypeScalePage"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Guide = lazy(() => import("./pages/Guide"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
 const theme = createTheme({
   palette: {
-    mode: 'dark', // Enable dark mode
+    mode: 'dark',
     primary: {
-      main: '#90caf9',
+      main: '#3b82f6', // Modern crisp blue
+      light: '#60a5fa',
+      dark: '#1d4ed8',
     },
     secondary: {
-      main: '#f48fb1',
+      main: '#ec4899',
     },
     background: {
-      default: '#121212',
-      paper: '#1e1e1e',
+      default: '#0b0f17', // Rich deep slate/dark
+      paper: '#131c2e',   // Elegant container fill
     },
+    divider: 'rgba(255, 255, 255, 0.08)',
+    text: {
+      primary: '#f3f4f6',
+      secondary: '#9ca3af',
+    }
+  },
+  typography: {
+    fontFamily: '"Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    h1: {
+      fontSize: '2.1rem',
+      '@media (min-width:600px)': { fontSize: '2.75rem' },
+      fontWeight: 800,
+      letterSpacing: '-0.025em',
+      lineHeight: 1.2,
+    },
+    h2: {
+      fontSize: '1.75rem',
+      '@media (min-width:600px)': { fontSize: '2.2rem' },
+      fontWeight: 800,
+      letterSpacing: '-0.02em',
+      lineHeight: 1.25,
+    },
+    h3: {
+      fontSize: '1.5rem',
+      '@media (min-width:600px)': { fontSize: '1.85rem' },
+      fontWeight: 700,
+      letterSpacing: '-0.02em',
+      lineHeight: 1.3,
+    },
+    h4: {
+      fontSize: '1.25rem',
+      '@media (min-width:600px)': { fontSize: '1.5rem' },
+      fontWeight: 700,
+      letterSpacing: '-0.015em',
+      lineHeight: 1.35,
+    },
+    h5: {
+      fontSize: '1.1rem',
+      '@media (min-width:600px)': { fontSize: '1.25rem' },
+      fontWeight: 600,
+      lineHeight: 1.4,
+    },
+    h6: {
+      fontSize: '0.95rem',
+      '@media (min-width:600px)': { fontSize: '1.05rem' },
+      fontWeight: 600,
+    },
+    body1: {
+      fontSize: '0.925rem',
+      lineHeight: 1.6,
+    },
+    body2: {
+      fontSize: '0.85rem',
+      lineHeight: 1.55,
+    },
+    caption: {
+      fontSize: '0.75rem',
+      lineHeight: 1.4,
+    },
+    button: {
+      textTransform: 'none',
+      fontWeight: 600,
+    }
+  },
+  shape: {
+    borderRadius: 10,
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+          padding: '8px 16px',
+        }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          backgroundImage: 'none',
+        }
+      }
+    }
   },
   breakpoints: {
     values: {
       xs: 0,
       sm: 600,
-      md: 900,
-      lg: 1200,
+      md: 960,
+      lg: 1280,
       xl: 1600,
     },
   },
@@ -46,9 +145,18 @@ const RootLayout = () => {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
+          <Header />
           <Box sx={{ flex: 1 }}>
-            <Outlet />
+            <Suspense
+              fallback={
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+                  <CircularProgress size={32} />
+                </Box>
+              }
+            >
+              <Outlet />
+            </Suspense>
           </Box>
           <Footer />
         </Box>
@@ -65,6 +173,54 @@ export const routes: RouteRecord[] = [
       {
         index: true,
         element: <Index />,
+      },
+      {
+        path: 'texto',
+        element: <TextLabPage />,
+      },
+      {
+        path: 'utm-builder',
+        element: <UtmPage />,
+      },
+      {
+        path: 'color-studio',
+        element: <ColorStudioPage />,
+      },
+      {
+        path: 'aspect-ratio',
+        element: <AspectRatioPage />,
+      },
+      {
+        path: 'qr-studio',
+        element: <QrStudioPage />,
+      },
+      {
+        path: 'gradient-studio',
+        element: <GradientStudioPage />,
+      },
+      {
+        path: 'lorem-generator',
+        element: <CopyGenPage />,
+      },
+      {
+        path: 'shadow-studio',
+        element: <ShadowStudioPage />,
+      },
+      {
+        path: 'button-forge',
+        element: <ButtonForgePage />,
+      },
+      {
+        path: 'card-builder',
+        element: <CardBuilderPage />,
+      },
+      {
+        path: 'clip-path-studio',
+        element: <ClipPathPage />,
+      },
+      {
+        path: 'typescale-generator',
+        element: <TypeScalePage />,
       },
       {
         path: 'privacidad',
@@ -89,3 +245,4 @@ export const routes: RouteRecord[] = [
     ],
   },
 ];
+
