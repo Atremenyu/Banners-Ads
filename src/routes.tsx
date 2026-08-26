@@ -1,32 +1,31 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { RouteRecord } from 'vite-react-ssg';
 import { Outlet } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Box, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
-// Lazy load pages for dynamic code-splitting and smaller initial bundles
-const Index = lazy(() => import("./pages/Index"));
-const TextLabPage = lazy(() => import("./pages/TextLabPage"));
-const UtmPage = lazy(() => import("./pages/UtmPage"));
-const ColorStudioPage = lazy(() => import("./pages/ColorStudioPage"));
-const AspectRatioPage = lazy(() => import("./pages/AspectRatioPage"));
-const QrStudioPage = lazy(() => import("./pages/QrStudioPage"));
-const GradientStudioPage = lazy(() => import("./pages/GradientStudioPage"));
-const CopyGenPage = lazy(() => import("./pages/CopyGenPage"));
-const ShadowStudioPage = lazy(() => import("./pages/ShadowStudioPage"));
-const ButtonForgePage = lazy(() => import("./pages/ButtonForgePage"));
-const CardBuilderPage = lazy(() => import("./pages/CardBuilderPage"));
-const ClipPathPage = lazy(() => import("./pages/ClipPathPage"));
-const TypeScalePage = lazy(() => import("./pages/TypeScalePage"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
-const TermsOfService = lazy(() => import("./pages/TermsOfService"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Guide = lazy(() => import("./pages/Guide"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+import Index from "./pages/Index";
+import TextLabPage from "./pages/TextLabPage";
+import UtmPage from "./pages/UtmPage";
+import ColorStudioPage from "./pages/ColorStudioPage";
+import AspectRatioPage from "./pages/AspectRatioPage";
+import QrStudioPage from "./pages/QrStudioPage";
+import GradientStudioPage from "./pages/GradientStudioPage";
+import CopyGenPage from "./pages/CopyGenPage";
+import ShadowStudioPage from "./pages/ShadowStudioPage";
+import ButtonForgePage from "./pages/ButtonForgePage";
+import CardBuilderPage from "./pages/CardBuilderPage";
+import ClipPathPage from "./pages/ClipPathPage";
+import TypeScalePage from "./pages/TypeScalePage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import Contact from "./pages/Contact";
+import Guide from "./pages/Guide";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -148,15 +147,7 @@ const RootLayout = () => {
         <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: 'background.default' }}>
           <Header />
           <Box sx={{ flex: 1 }}>
-            <Suspense
-              fallback={
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-                  <CircularProgress size={32} />
-                </Box>
-              }
-            >
-              <Outlet />
-            </Suspense>
+            <Outlet />
           </Box>
           <Footer />
         </Box>
