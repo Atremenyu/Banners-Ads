@@ -1,0 +1,6 @@
+{
+  "name": "DesignKit Studio - Banner Optimizer",
+  "description": "Suite profesional de optimización de imágenes para banners, generador de paletas, analizador de texto SEO y utilidades de diseño 100% en el navegador.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

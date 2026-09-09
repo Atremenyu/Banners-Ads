@@ -33,6 +33,13 @@ const Index = () => {
       <Head>
         <title>Banner Optimizer - Recorta y Optimiza Imágenes de Banners Online</title>
         <meta name="description" content="Optimiza y recorta tus imágenes para formatos de banner estándar en segundos. Herramienta web gratuita y 100% local para recortar y comprimir banners con descarga en ZIP." />
+        <meta name="keywords" content="banner optimizer, optimizador de banners, recortar banners, comprimir imagenes webp, formatos iab 728x90, compresor imagenes adsense" />
+        <meta property="og:title" content="Banner Optimizer - Recorta y Optimiza Imágenes de Banners Online" />
+        <meta property="og:description" content="Optimiza y recorta imágenes para banners estándar (728x90, 600x500, 640x200) de forma 100% local y gratuita." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Banner Optimizer | DesignKit Studio" />
+        <meta name="twitter:description" content="Herramienta gratuita para optimizar banners con descarga por lotes en ZIP y procesamiento privado en el navegador." />
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}
         </script>

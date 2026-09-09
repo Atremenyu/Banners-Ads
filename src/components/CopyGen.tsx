@@ -143,7 +143,7 @@ const CopyGen = () => {
       {/* Title */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 0.5, letterSpacing: -0.5 }}>
-          Lorem<Box component="span" sx={{ color: 'primary.main' }}>Craft</Box> — Generador de Microcopy
+          Lorem<Box component="span" sx={{ color: 'primary.main' }}>Craft</Box>: Generador de Microcopy
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 640, mx: 'auto', opacity: 0.85 }}>
           Genera texto Lorem Ipsum tradicional o frases comerciales en español para maquetas web y botones de llamada a la acción.

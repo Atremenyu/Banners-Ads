@@ -15,7 +15,6 @@ import {
   Gradient as GradientIcon,
   Layers as LayersIcon,
   FormatQuote as QuoteIcon,
-  AutoAwesome as AutoAwesomeIcon,
   KeyboardArrowDown as ArrowDownIcon,
   Image as ImageIcon,
   EditNote as EditNoteIcon,
@@ -24,7 +23,15 @@ import {
   TouchApp as TouchIcon,
   ViewCarousel as CardIcon,
   Category as ShapeIcon,
-  FormatSize as FormatSizeIcon
+  FormatSize as FormatSizeIcon,
+  Animation as AnimationIcon,
+  Transform as TransformIcon,
+  Compare as CompareIcon,
+  Language as LanguageIcon,
+  Share as ShareIcon,
+  Security as SecurityIcon,
+  BrandingWatermark as WatermarkIcon,
+  AutoFixHigh as ToolsIcon
 } from '@mui/icons-material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
@@ -46,12 +53,27 @@ interface CategoryGroup {
 const categories: CategoryGroup[] = [
   {
     id: 'images',
-    title: 'Imágenes & Banners',
+    title: 'Banners & Web',
     icon: <ImageIcon fontSize="small" />,
     items: [
       { label: 'Optimizador Banners', desc: 'Recorta, reencuadra y comprime WebP/JPEG', path: '/', icon: <CropIcon fontSize="small" />, badge: 'Pro' },
-      { label: 'Ratio Calculator', desc: 'Calcula dimensiones y aspect ratios', path: '/aspect-ratio', icon: <AspectRatioIcon fontSize="small" /> },
-      { label: 'QR Studio', desc: 'Genera códigos QR para URLs, Wi-Fi y WhatsApp', path: '/qr-studio', icon: <QrCodeIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Banners GIF (≤180KB)', desc: 'Optimiza banners GIF animados para Google Ads', path: '/gif-optimizer', icon: <AnimationIcon fontSize="small" />, badge: '≤180K' },
+      { label: 'Conversor de Formatos', desc: 'Convierte por lotes entre WebP, PNG y JPEG', path: '/conversor-formatos', icon: <TransformIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Compresor en Vivo', desc: 'Comparador antes y después en pantalla dividida', path: '/compresor-imagenes', icon: <CompareIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Ratio Calculator', desc: 'Calcula dimensiones y ratios con subida de imagen', path: '/aspect-ratio', icon: <AspectRatioIcon fontSize="small" /> },
+      { label: 'QR Studio', desc: 'Genera códigos QR para URLs, Wi-Fi y WhatsApp', path: '/qr-studio', icon: <QrCodeIcon fontSize="small" /> },
+    ]
+  },
+  {
+    id: 'image-tools',
+    title: 'Utilidades de Imagen',
+    icon: <ToolsIcon fontSize="small" />,
+    items: [
+      { label: 'Generador de Favicons', desc: 'Crea el paquete ICO, Apple Touch y site.webmanifest', path: '/favicon-generator', icon: <LanguageIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Redes Sociales', desc: 'Redimensiona para Instagram, TikTok, X y YouTube', path: '/redimensionador-redes', icon: <ShareIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Limpiador EXIF', desc: 'Elimina coordenadas GPS y datos privados de fotos', path: '/limpiador-exif', icon: <SecurityIcon fontSize="small" />, badge: 'Privacidad' },
+      { label: 'SVG a PNG / WebP', desc: 'Rasteriza vectores a alta definición en 1x, 2x y 4x', path: '/svg-rasterizer', icon: <CodeIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Estudio de Marcas de Agua', desc: 'Añade textos, logos y patrones de seguridad', path: '/marcas-agua', icon: <WatermarkIcon fontSize="small" />, badge: 'Nuevo' },
     ]
   },
   {
@@ -61,7 +83,7 @@ const categories: CategoryGroup[] = [
     items: [
       { label: 'TextLab & SEO', desc: 'Transformador de texto y límites de caracteres', path: '/texto', icon: <TextFieldsIcon fontSize="small" />, badge: 'SEO' },
       { label: 'UTM Builder', desc: 'Generador de enlaces de marketing rastreables', path: '/utm-builder', icon: <LinkIcon fontSize="small" /> },
-      { label: 'LoremCraft', desc: 'Generador de Lorem Ipsum y microcopy comercial', path: '/lorem-generator', icon: <QuoteIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'LoremCraft', desc: 'Generador de Lorem Ipsum y microcopy comercial', path: '/lorem-generator', icon: <QuoteIcon fontSize="small" /> },
     ]
   },
   {
@@ -70,19 +92,19 @@ const categories: CategoryGroup[] = [
     icon: <BrushIcon fontSize="small" />,
     items: [
       { label: 'Color Studio', desc: 'Extractor de paletas y validador WCAG', path: '/color-studio', icon: <PaletteIcon fontSize="small" /> },
-      { label: 'Gradient Studio', desc: 'Gradientes CSS y fondos HD en 1080p', path: '/gradient-studio', icon: <GradientIcon fontSize="small" />, badge: 'Nuevo' },
-      { label: 'Shadow Studio', desc: 'Sombras box-shadow y Glassmorphism', path: '/shadow-studio', icon: <LayersIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Gradient Studio', desc: 'Gradientes CSS y fondos HD en 1080p', path: '/gradient-studio', icon: <GradientIcon fontSize="small" /> },
+      { label: 'Shadow Studio', desc: 'Sombras box-shadow y Glassmorphism', path: '/shadow-studio', icon: <LayersIcon fontSize="small" /> },
     ]
   },
   {
     id: 'dev',
-    title: 'Desarrollo Frontend',
+    title: 'Frontend & UI',
     icon: <CodeIcon fontSize="small" />,
     items: [
-      { label: 'Button & Badge Forge', desc: 'Creador de botones interactivas y badges', path: '/button-forge', icon: <TouchIcon fontSize="small" />, badge: 'Nuevo' },
-      { label: 'UI Card Builder', desc: 'Generador de componentes y tarjetas UI', path: '/card-builder', icon: <CardIcon fontSize="small" />, badge: 'Nuevo' },
-      { label: 'CSS Clip-Path Studio', desc: 'Formas geométricas y organic blobs', path: '/clip-path-studio', icon: <ShapeIcon fontSize="small" />, badge: 'Nuevo' },
-      { label: 'TypeScale Generator', desc: 'Escalas tipográficas y CSS Clamp()', path: '/typescale-generator', icon: <FormatSizeIcon fontSize="small" />, badge: 'Nuevo' },
+      { label: 'Button & Badge Forge', desc: 'Creador de botones interactivas y badges', path: '/button-forge', icon: <TouchIcon fontSize="small" /> },
+      { label: 'UI Card Builder', desc: 'Generador de componentes y tarjetas UI', path: '/card-builder', icon: <CardIcon fontSize="small" /> },
+      { label: 'CSS Clip-Path Studio', desc: 'Formas geométricas y organic blobs', path: '/clip-path-studio', icon: <ShapeIcon fontSize="small" /> },
+      { label: 'TypeScale Generator', desc: 'Escalas tipográficas y CSS Clamp()', path: '/typescale-generator', icon: <FormatSizeIcon fontSize="small" /> },
     ]
   }
 ];
@@ -140,6 +162,7 @@ const Header = () => {
               }}
             >
               <Box
+                id="app-logo-box"
                 sx={{
                   width: 34,
                   height: 34,
@@ -152,7 +175,7 @@ const Header = () => {
                   boxShadow: '0 0 16px rgba(59, 130, 246, 0.4)'
                 }}
               >
-                <AutoAwesomeIcon sx={{ fontSize: 20 }} />
+                <LayersIcon sx={{ fontSize: 20 }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 800, lineHeight: 1.1, letterSpacing: -0.5, fontSize: '1.1rem' }}>
@@ -287,6 +310,7 @@ const Header = () => {
 
             {/* Hamburger Button for screens below lg (<1200px) */}
             <IconButton
+              id="mobile-drawer-toggle"
               color="inherit"
               aria-label="Abrir menú de herramientas"
               edge="end"
@@ -308,6 +332,7 @@ const Header = () => {
 
       {/* Mobile & Tablet Navigation Drawer */}
       <Drawer
+        id="mobile-nav-drawer"
         anchor="right"
         open={mobileOpen}
         onClose={handleDrawerToggle}
@@ -336,7 +361,7 @@ const Header = () => {
                 color: '#fff'
               }}
             >
-              <AutoAwesomeIcon sx={{ fontSize: 18 }} />
+              <LayersIcon sx={{ fontSize: 18 }} />
             </Box>
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2 }}>
@@ -417,14 +442,17 @@ const Header = () => {
         </Box>
 
         <Divider sx={{ my: 2, borderColor: 'rgba(255, 255, 255, 0.1)' }} />
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', px: 1 }}>
-          <Button component={RouterLink} to="/guia" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.75rem', textTransform: 'none', color: 'text.secondary' }}>
-            Guía de Uso
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5, px: 0.5 }}>
+          <Button component={RouterLink} to="/acerca-de" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.72rem', textTransform: 'none', color: 'text.secondary' }}>
+            Acerca de
           </Button>
-          <Button component={RouterLink} to="/contacto" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.75rem', textTransform: 'none', color: 'text.secondary' }}>
+          <Button component={RouterLink} to="/guia" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.72rem', textTransform: 'none', color: 'text.secondary' }}>
+            Guía & FAQs
+          </Button>
+          <Button component={RouterLink} to="/contacto" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.72rem', textTransform: 'none', color: 'text.secondary' }}>
             Contacto
           </Button>
-          <Button component={RouterLink} to="/privacidad" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.75rem', textTransform: 'none', color: 'text.secondary' }}>
+          <Button component={RouterLink} to="/privacidad" onClick={() => setMobileOpen(false)} size="small" sx={{ fontSize: '0.72rem', textTransform: 'none', color: 'text.secondary' }}>
             Privacidad
           </Button>
         </Box>

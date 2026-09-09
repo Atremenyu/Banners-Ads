@@ -129,7 +129,7 @@ const UtmBuilder = () => {
       {/* Title & Intro */}
       <Box sx={{ mb: 3, textAlign: 'center' }}>
         <Typography variant="h4" component="h1" sx={{ fontWeight: 800, mb: 0.5, letterSpacing: -0.5 }}>
-          UTM<Box component="span" sx={{ color: 'primary.main' }}>Craft</Box> — Creador de Enlaces
+          UTM<Box component="span" sx={{ color: 'primary.main' }}>Craft</Box>: Creador de Enlaces
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 640, mx: 'auto', opacity: 0.85 }}>
           Construye URLs etiquetadas profesionalmente con parámetros Google Analytics para rastrear el rendimiento de tus campañas.

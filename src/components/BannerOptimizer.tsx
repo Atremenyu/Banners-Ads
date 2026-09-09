@@ -1,7 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import {
   Button, Card, CardContent, CardHeader, Typography, Chip, LinearProgress, Slider,
-  Container, Grid, Box, Paper, Snackbar, Alert, CircularProgress, TextField
+  Container, Grid, Box, Paper, Snackbar, Alert, CircularProgress, TextField,
+  Accordion, AccordionSummary, AccordionDetails, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Divider
 } from '@mui/material';
 import {
   UploadFile as UploadFileIcon,
@@ -13,7 +15,23 @@ import {
   Archive as ArchiveIcon,
   TrendingDown as TrendingDownIcon,
   CompareArrows as CompareArrowsIcon,
+  ExpandMore as ExpandMoreIcon,
+  Speed as SpeedIcon,
+  Layers as LayersIcon,
+  Lightbulb as LightbulbIcon,
+  Security as SecurityIcon,
+  HelpOutline as HelpIcon,
+  CheckCircleOutline as CheckOutlineIcon,
+  Assessment as AssessmentIcon,
+  Animation as AnimationIcon,
+  Transform as TransformIcon,
+  Compare as CompareIcon,
+  Language as LanguageIcon,
+  Share as ShareIcon,
+  BrandingWatermark as WatermarkIcon,
+  Code as CodeIcon
 } from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
 import JSZip from 'jszip';
 import AdPlaceholder, { LateralAds } from './AdPlaceholder';
 
@@ -604,6 +622,46 @@ const BannerOptimizer: React.FC = () => {
         ))}
       </Grid>
 
+      {/* Callout to GIF Banner Optimizer */}
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2.5,
+          mb: 4,
+          borderRadius: 3,
+          bgcolor: 'rgba(59, 130, 246, 0.05)',
+          borderColor: 'rgba(59, 130, 246, 0.25)',
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 2,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ p: 1.2, borderRadius: 2, bgcolor: 'primary.main', color: 'white', display: 'flex' }}>
+            <AnimationIcon />
+          </Box>
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              ¿Necesitas optimizar Banners GIF Animados?
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Nueva herramienta con compresión garantizada <strong>menor a 180 KB</strong> para Google Ads y redes publicitarias IAB.
+            </Typography>
+          </Box>
+        </Box>
+        <Button
+          component={RouterLink}
+          to="/gif-optimizer"
+          variant="contained"
+          color="primary"
+          sx={{ whiteSpace: 'nowrap', fontWeight: 700 }}
+        >
+          Probar Optimizador GIF
+        </Button>
+      </Paper>
+
       <Box sx={{ mb: 4 }}>
         <DropZone
           onFilesSelected={addFilesToQueue}
@@ -735,41 +793,389 @@ const BannerOptimizer: React.FC = () => {
         );
       })()}
 
-      {/* Sección informativa adicional para cumplimiento de AdSense */}
-      <Box sx={{ mt: 12, mb: 8 }}>
-        <Typography variant="h4" gutterBottom align="center" sx={{ mb: 4 }}>
-          ¿Cómo funciona Banner Optimizer?
-        </Typography>
-        <Grid container spacing={4}>
+      {/* Anuncio Horizontal In-Content (Entre la herramienta y el contenido técnico) */}
+      <Box sx={{ my: 6 }}>
+        <AdPlaceholder type="horizontal" label="In-Content Dinámico" />
+      </Box>
+
+      {/* SECCIÓN EDUCATIVA 1: Estándares de Banners Publicitarios y Formatos IAB */}
+      <Box sx={{ mt: 6, mb: 6 }} id="estandares-banners">
+        <Box sx={{ textAlign: 'center', mb: 5 }}>
+          <Chip icon={<AssessmentIcon />} label="Estándares de la Industria" color="primary" sx={{ mb: 1.5, fontWeight: 700 }} />
+          <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 800 }}>
+            Estándares de Banners Publicitarios (IAB & Google Ads)
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 780, mx: 'auto', lineHeight: 1.6 }}>
+            Para maximizar el rendimiento de las campañas en la Red de Display de Google, redes de afiliados y medios digitales, es indispensable cumplir con las dimensiones y especificaciones dictadas por el Interactive Advertising Bureau (IAB).
+          </Typography>
+        </Box>
+
+        {/* Tabla de Dimensiones Estándar */}
+        <Paper variant="outlined" sx={{ mb: 5, overflow: 'hidden', borderRadius: 3, borderColor: 'rgba(255, 255, 255, 0.08)' }}>
+          <TableContainer>
+            <Table aria-label="tabla de dimensiones y formatos estándar de banners">
+              <TableHead sx={{ bgcolor: 'rgba(59, 130, 246, 0.1)' }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.light' }}>Formato Publicitario</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.light' }}>Dimensiones (px)</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.light' }}>Aspect Ratio</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.light' }}>Ubicación Recomendada</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.light' }}>Peso Máx. Sugerido</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Leaderboard / Superbanner</TableCell>
+                  <TableCell><Chip label="728 × 90" size="small" variant="outlined" color="primary" /></TableCell>
+                  <TableCell>8.09:1 (Panorámico)</TableCell>
+                  <TableCell>Cabecera principal superior (Above the fold) en desktop y tablets</TableCell>
+                  <TableCell color="success.main">&lt; 150 KB</TableCell>
+                </TableRow>
+                <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Medium Rectangle / Robapáginas</TableCell>
+                  <TableCell><Chip label="300 × 250" size="small" variant="outlined" color="primary" /></TableCell>
+                  <TableCell>1.20:1 (Casi cuadrado)</TableCell>
+                  <TableCell>Insertado dentro del contenido editorial (In-Article) o barra lateral</TableCell>
+                  <TableCell>&lt; 150 KB</TableCell>
+                </TableRow>
+                <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Banner Cuadrado Promocional</TableCell>
+                  <TableCell><Chip label="600 × 500" size="small" variant="outlined" color="primary" /></TableCell>
+                  <TableCell>1.20:1 (Retina 2x)</TableCell>
+                  <TableCell>Promociones destacadas en newsletters, e-commerce y carruseles</TableCell>
+                  <TableCell>&lt; 200 KB</TableCell>
+                </TableRow>
+                <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Banner Horizontal Móvil</TableCell>
+                  <TableCell><Chip label="640 × 200" size="small" variant="outlined" color="primary" /></TableCell>
+                  <TableCell>3.20:1 (Horizontal)</TableCell>
+                  <TableCell>Separador de secciones en blogs y cabeceras de boletines</TableCell>
+                  <TableCell>&lt; 120 KB</TableCell>
+                </TableRow>
+                <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Hero Banner Panorámico</TableCell>
+                  <TableCell><Chip label="1100 × 361" size="small" variant="outlined" color="primary" /></TableCell>
+                  <TableCell>3.05:1 (Ultra-ancho)</TableCell>
+                  <TableCell>Portadas de landing pages, cabeceras de tiendas Shopify y WordPress</TableCell>
+                  <TableCell>&lt; 250 KB</TableCell>
+                </TableRow>
+                <TableRow sx={{ '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.02)' } }}>
+                  <TableCell sx={{ fontWeight: 600 }}>Wide Skyscraper / Rascacielos</TableCell>
+                  <TableCell><Chip label="160 × 600" size="small" variant="outlined" color="primary" /></TableCell>
+                  <TableCell>1:3.75 (Vertical)</TableCell>
+                  <TableCell>Barras laterales fijas (Sticky Sidebars) en pantallas de escritorio</TableCell>
+                  <TableCell>&lt; 150 KB</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+
+        {/* Comparativa de Formatos: WebP vs JPG vs PNG */}
+        <Grid container spacing={3} sx={{ mb: 5 }}>
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
-              <Typography variant="h6" gutterBottom color="primary">Privacidad Total</Typography>
-              <Typography variant="body2" color="text.secondary">
-                A diferencia de otros optimizadores, tus imágenes nunca se suben a un servidor. Todo el procesamiento (redimensionamiento y compresión) ocurre localmente en tu navegador. Tus archivos privados permanecen privados.
+            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(59, 130, 246, 0.04)', border: '1px solid rgba(59, 130, 246, 0.15)', borderRadius: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <SpeedIcon color="primary" />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>WebP (Recomendado)</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Desarrollado por Google, ofrece una compresión superior (entre 25% y 34% más eficiente que JPEG equivalente) soportando tanto compresión con pérdida como sin pérdida y transparencias alfa. Es el formato moderno por excelencia para acelerar sitios web.
               </Typography>
             </Paper>
           </Grid>
+
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
-              <Typography variant="h6" gutterBottom color="primary">Formatos Inteligentes</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Nuestra herramienta detecta automáticamente la mejor relación de aspecto para tu imagen y te sugiere los formatos de banner más adecuados, desde leaderboards hasta rectángulos medianos, optimizando el espacio visual.
+            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(16, 185, 129, 0.04)', border: '1px solid rgba(16, 185, 129, 0.15)', borderRadius: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <ImageIcon color="success" />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>JPEG / JPG (Universal)</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Ideal para fotografías complejas y banners con degradados fotográficos continuos. Ofrece 100% de compatibilidad en cualquier navegador antiguo o plataforma de correo electrónico, permitiendo graduar el ratio de calidad/peso con precisión milimétrica.
               </Typography>
             </Paper>
           </Grid>
+
           <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(255, 255, 255, 0.03)' }}>
-              <Typography variant="h6" gutterBottom color="primary">Optimizado para Web</Typography>
-              <Typography variant="body2" color="text.secondary">
-                Generamos archivos ligeros que cumplen con los estándares de velocidad de Google (Core Web Vitals). Mejora el SEO de tu sitio web reduciendo el tiempo de carga de tus elementos visuales sin perder calidad perceptible.
+            <Paper sx={{ p: 3, height: '100%', bgcolor: 'rgba(236, 72, 153, 0.04)', border: '1px solid rgba(236, 72, 153, 0.15)', borderRadius: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                <LayersIcon color="secondary" />
+                <Typography variant="h6" sx={{ fontWeight: 700 }}>PNG (Alta Fidelidad)</Typography>
+              </Box>
+              <Typography variant="body2" color="text.secondary" paragraph>
+                Compresión sin pérdida diseñada para logotipos, textos tipográficos nítidos y gráficos con fondos transparentes. Aunque su peso suele ser mayor, es fundamental cuando se requiere nitidez absoluta en isotipos y bordes de contraste agudo.
               </Typography>
             </Paper>
           </Grid>
         </Grid>
+
+        {/* SECCIÓN EDUCATIVA 2: Core Web Vitals y Rendimiento Web */}
+        <Paper sx={{ p: { xs: 3, md: 4 }, bgcolor: 'background.paper', borderRadius: 3, border: '1px solid rgba(255, 255, 255, 0.08)', mb: 6 }}>
+          <Typography variant="h5" component="h3" gutterBottom sx={{ fontWeight: 800, color: 'primary.light', display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SpeedIcon /> Impacto de la Compresión en Core Web Vitals y CTR Publicitario
+          </Typography>
+          <Typography variant="body1" color="text.secondary" paragraph>
+            Google utiliza las métricas de <strong>Core Web Vitals</strong> como factor de posicionamiento oficial en su motor de búsqueda. Las imágenes pesadas y sin optimizar son la principal causa de calificaciones deficientes en PageSpeed Insights:
+          </Typography>
+
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ p: 2, bgcolor: 'rgba(255, 255, 255, 0.02)', borderRadius: 2, borderLeft: '3px solid #3b82f6', height: '100%' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'primary.light', mb: 0.5 }}>
+                  LCP (Largest Contentful Paint)
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Mide el tiempo transcurrido hasta que el elemento visual principal de la pantalla se renderiza. Al comprimir banners de 800 KB a menos de 60 KB, el LCP se reduce a menudo de 3.8s a menos de 1.1s, ingresando en la zona verde de Google (&lt; 2.5s).
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Box sx={{ p: 2, bgcolor: 'rgba(255, 255, 255, 0.02)', borderRadius: 2, borderLeft: '3px solid #10b981', height: '100%' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'success.light', mb: 0.5 }}>
+                  CLS (Cumulative Layout Shift)
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Mide la estabilidad visual. Al utilizar proporciones de aspecto estandarizadas (como 728x90 o 300x250), los contenedores HTML reservan el espacio exacto por anticipado, eliminando saltos bruscos de contenido mientras el anuncio se descarga.
+                </Typography>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <Box sx={{ p: 2, bgcolor: 'rgba(255, 255, 255, 0.02)', borderRadius: 2, borderLeft: '3px solid #ec4899', height: '100%' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: 'secondary.light', mb: 0.5 }}>
+                  INP & CTR de Campañas
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Estudios de Google y Akamai demuestran que cada 100 milisegundos de retraso en la carga de un banner reduce el CTR (Click-Through Rate) hasta en un 7%. Banners ultraligeros garantizan que el anuncio sea visto antes de que el usuario haga scroll.
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {/* SUITE DE HERRAMIENTAS DE IMAGEN */}
+        <Box sx={{ mb: 7 }} id="suite-herramientas-imagen">
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Chip icon={<LayersIcon />} label="Ecosistema Multimedia" color="primary" sx={{ mb: 1.5, fontWeight: 700 }} />
+            <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 800 }}>
+              Más Herramientas de Imagen en DesignKit
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 640, mx: 'auto' }}>
+              Utilidades 100% locales ejecutadas en tu navegador para optimizar tu flujo de trabajo digital.
+            </Typography>
+          </Box>
+
+          <Grid container spacing={2.5}>
+            {[
+              {
+                title: 'Conversor de Formatos',
+                desc: 'Convierte lotes de imágenes entre WebP, PNG y JPEG con control de calidad.',
+                path: '/conversor-formatos',
+                icon: <TransformIcon color="primary" />,
+                badge: 'Lotes'
+              },
+              {
+                title: 'Compresor con Vista en Vivo',
+                desc: 'Compara calidad antes y después en pantalla dividida en tiempo real.',
+                path: '/compresor-imagenes',
+                icon: <CompareIcon color="primary" />,
+                badge: 'Interactivo'
+              },
+              {
+                title: 'Generador de Favicons',
+                desc: 'Genera el paquete completo de iconos web, Apple Touch y site.webmanifest.',
+                path: '/favicon-generator',
+                icon: <LanguageIcon color="primary" />,
+                badge: 'PWA'
+              },
+              {
+                title: 'Redimensionador Redes Sociales',
+                desc: 'Adapta creatividades a Instagram, TikTok, YouTube, X y LinkedIn.',
+                path: '/redimensionador-redes',
+                icon: <ShareIcon color="primary" />,
+                badge: 'Presets'
+              },
+              {
+                title: 'Limpiador de EXIF & GPS',
+                desc: 'Elimina metadatos privados, coordenadas y modelo de cámara de tus fotos.',
+                path: '/limpiador-exif',
+                icon: <SecurityIcon color="primary" />,
+                badge: 'Privacidad'
+              },
+              {
+                title: 'Rasterizador SVG a PNG/WebP',
+                desc: 'Convierte vectores SVG a resoluciones nítidas en 1x, 2x y 4x Ultra HD.',
+                path: '/svg-rasterizer',
+                icon: <CodeIcon color="primary" />,
+                badge: 'Vectorial'
+              },
+              {
+                title: 'Estudio de Marcas de Agua',
+                desc: 'Protege tu contenido con marcas de agua de texto, logotipo y patrones.',
+                path: '/marcas-agua',
+                icon: <WatermarkIcon color="primary" />,
+                badge: 'Seguridad'
+              },
+              {
+                title: 'Banners GIF Animados',
+                desc: 'Comprime GIFs publicitarios para mantenerlos estrictamente bajo 180 KB.',
+                path: '/gif-optimizer',
+                icon: <AnimationIcon color="primary" />,
+                badge: '≤180KB'
+              }
+            ].map((tool) => (
+              <Grid item xs={12} sm={6} md={3} key={tool.path}>
+                <Paper
+                  variant="outlined"
+                  component={RouterLink}
+                  to={tool.path}
+                  sx={{
+                    p: 2.5,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: '100%',
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    borderRadius: 2.5,
+                    bgcolor: 'rgba(255, 255, 255, 0.02)',
+                    borderColor: 'rgba(255, 255, 255, 0.08)',
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      bgcolor: 'rgba(59, 130, 246, 0.06)',
+                      borderColor: 'primary.main',
+                      transform: 'translateY(-2px)'
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                    <Box sx={{ p: 1, borderRadius: 2, bgcolor: 'rgba(59, 130, 246, 0.1)', display: 'flex' }}>
+                      {tool.icon}
+                    </Box>
+                    <Chip label={tool.badge} size="small" variant="outlined" sx={{ fontWeight: 700, fontSize: '0.7rem' }} />
+                  </Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
+                    {tool.title}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5, flex: 1 }}>
+                    {tool.desc}
+                  </Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        {/* SECCIÓN 3: Preguntas Frecuentes (FAQ Accordion) */}
+        <Box sx={{ mb: 6 }} id="preguntas-frecuentes">
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Chip icon={<HelpIcon />} label="Dudas Frecuentes" color="secondary" sx={{ mb: 1.5, fontWeight: 700 }} />
+            <Typography variant="h4" component="h2" gutterBottom sx={{ fontWeight: 800 }}>
+              Preguntas Frecuentes sobre Banner Optimizer
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Todo lo que necesitas saber sobre privacidad, formatos de compresión y especificaciones publicitarias.
+            </Typography>
+          </Box>
+
+          <Box sx={{ maxWidth: 900, mx: 'auto' }}>
+            <Accordion defaultExpanded sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', mb: 1.5, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  ¿Cómo protege mis datos la optimización client-side?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  Nuestra herramienta aprovecha las APIs nativas de HTML5 (Canvas y File API) en tu propio navegador. Esto significa que las imágenes se cargan, redimensionan, reencuadran y comprimen en la memoria RAM de tu computadora o teléfono móvil. <strong>Ninguna imagen se transmite por Internet a servidores externos ni queda almacenada en bases de datos</strong>, garantizando 100% de confidencialidad para material creativo y campañas bajo embargo.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', mb: 1.5, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  ¿Cuál es la diferencia entre PNG, JPG y WebP para anuncios publicitarios?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  <strong>JPG</strong> utiliza compresión con pérdida y es ideal para creatividades con fotografías complejas; <strong>PNG</strong> ofrece compresión sin pérdida preservando bordes nítidos y fondos transparentes; <strong>WebP</strong> combina las ventajas de ambos, logrando archivos entre un 25% y 35% más ligeros con idéntica calidad visual. Para la Red de Display de Google, WebP y JPG con calidad ~85% representan el balance óptimo entre peso y definición.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', mb: 1.5, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  ¿Por qué es crítico reducir el peso de las imágenes en la web?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  Las imágenes representan más del 60% del peso promedio de una página web moderna. Reducir su tamaño en kilobytes ahorra ancho de banda en conexiones móviles, disminuye la tasa de rebote (bounce rate) y permite que los sitios aprueben las auditorías de <strong>Core Web Vitals</strong> de Google, lo que se traduce en un mejor posicionamiento SEO orgánico y menores costos por clic (CPC) en anuncios publicitarios.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', mb: 1.5, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  ¿Qué relación de aspecto es ideal para cabeceras y banners laterales?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  Para cabeceras superiores (Leaderboard) el estándar internacional es <strong>728×90 px (ratio ~8.09:1)</strong> o <strong>1100×361 px (ratio 3.05:1)</strong> en landing pages panorámicas. Para barras laterales (Sidebars), el formato más efectivo es el Skyscraper de <strong>160×600 px (ratio 1:3.75)</strong> o el Half Page de <strong>300×600 px (ratio 1:2)</strong>, pues garantizan alta visibilidad durante el desplazamiento vertical del lector.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', mb: 1.5, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  ¿Cómo afecta la velocidad de carga al CTR de las campañas de marketing?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  Un banner publicitario pesado que tarda más de 2 segundos en renderizarse con frecuencia nunca es visto por el usuario, ya que este suele desplazarse rápidamente hacia el contenido de la página. Banners que cargan en menos de 300 ms registran tasas de visibilidad (Viewability) superiores al 85% y aumentan el Click-Through Rate (CTR) de manera sostenida.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', mb: 1.5, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  ¿Cuáles son los límites de peso de archivo en Google Display Network y Meta Ads?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  Google Ads establece un límite estricto de <strong>150 KB</strong> para banners estáticos o animados HTML5 en su red de Display. Para Meta (Facebook e Instagram Ads), aunque el límite técnico es mayor (hasta 30 MB), se recomienda enfáticamente mantener las imágenes por debajo de <strong>200-300 KB</strong> para evitar penalizaciones en la subasta y maximizar la velocidad de entrega en feeds móviles.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            <Accordion sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.08)', mb: 1.5, borderRadius: '8px !important', '&:before': { display: 'none' } }}>
+              <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: 'primary.main' }} />}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+                  ¿Puedo recortar y optimizar múltiples formatos a la vez y descargarlos en un único archivo ZIP?
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7 }}>
+                  Sí. Puedes arrastrar varios archivos a la vez a nuestra zona de carga. Cada imagen será detectada y asociada a su mejor proporción recomendada, o bien podrás personalizar las dimensiones de salida para cada una. Al finalizar, el botón <strong>"Descargar Todo"</strong> generará al instante un archivo comprimido <code>.zip</code> con todos tus banners listos para publicar.
+                </Typography>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        </Box>
       </Box>
 
-      {/* Anuncio Horizontal Inferior (Móvil y Escritorio) */}
-      <Box sx={{ mt: 8 }}>
+      {/* Anuncio Horizontal Inferior con margen de seguridad >= 32px */}
+      <Box sx={{ mt: 8, mb: 4 }}>
         <AdPlaceholder type="horizontal" label="Inferior" />
       </Box>
 

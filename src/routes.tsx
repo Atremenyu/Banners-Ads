@@ -9,6 +9,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 
 import Index from "./pages/Index";
+import GifOptimizerPage from "./pages/GifOptimizerPage";
 import TextLabPage from "./pages/TextLabPage";
 import UtmPage from "./pages/UtmPage";
 import ColorStudioPage from "./pages/ColorStudioPage";
@@ -21,10 +22,18 @@ import ButtonForgePage from "./pages/ButtonForgePage";
 import CardBuilderPage from "./pages/CardBuilderPage";
 import ClipPathPage from "./pages/ClipPathPage";
 import TypeScalePage from "./pages/TypeScalePage";
+import FormatConverterPage from "./pages/FormatConverterPage";
+import FaviconGeneratorPage from "./pages/FaviconGeneratorPage";
+import SocialResizerPage from "./pages/SocialResizerPage";
+import ExifCleanerPage from "./pages/ExifCleanerPage";
+import SvgRasterizerPage from "./pages/SvgRasterizerPage";
+import ImageCompressorPage from "./pages/ImageCompressorPage";
+import WatermarkPage from "./pages/WatermarkPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import Contact from "./pages/Contact";
 import Guide from "./pages/Guide";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -166,6 +175,14 @@ export const routes: RouteRecord[] = [
         element: <Index />,
       },
       {
+        path: 'gif-optimizer',
+        element: <GifOptimizerPage />,
+      },
+      {
+        path: 'banner-gif',
+        element: <GifOptimizerPage />,
+      },
+      {
         path: 'texto',
         element: <TextLabPage />,
       },
@@ -214,6 +231,34 @@ export const routes: RouteRecord[] = [
         element: <TypeScalePage />,
       },
       {
+        path: 'conversor-formatos',
+        element: <FormatConverterPage />,
+      },
+      {
+        path: 'compresor-imagenes',
+        element: <ImageCompressorPage />,
+      },
+      {
+        path: 'favicon-generator',
+        element: <FaviconGeneratorPage />,
+      },
+      {
+        path: 'redimensionador-redes',
+        element: <SocialResizerPage />,
+      },
+      {
+        path: 'limpiador-exif',
+        element: <ExifCleanerPage />,
+      },
+      {
+        path: 'svg-rasterizer',
+        element: <SvgRasterizerPage />,
+      },
+      {
+        path: 'marcas-agua',
+        element: <WatermarkPage />,
+      },
+      {
         path: 'privacidad',
         element: <PrivacyPolicy />,
       },
@@ -228,6 +273,14 @@ export const routes: RouteRecord[] = [
       {
         path: 'guia',
         element: <Guide />,
+      },
+      {
+        path: 'acerca-de',
+        element: <About />,
+      },
+      {
+        path: 'about',
+        element: <About />,
       },
       {
         path: '*',

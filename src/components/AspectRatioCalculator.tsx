@@ -1,18 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import AdPlaceholder, { LateralAds } from './AdPlaceholder';
 import {
   Container, Typography, Box, Paper, Grid, TextField, Button,
-  Chip, Snackbar, Alert, Card, CardContent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
+  Chip, Snackbar, Alert, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  ButtonGroup, Tooltip
 } from '@mui/material';
 import {
   AspectRatio as AspectRatioIcon,
   ContentCopy as CopyIcon,
   SwapHoriz as SwapIcon,
-  Lock as LockIcon,
-  LockOpen as LockOpenIcon,
-  Check as CheckIcon,
-  AutoAwesome as MagicIcon,
-  CropSquare as CropSquareIcon
+  CropSquare as CropSquareIcon,
+  UploadFile as UploadFileIcon,
+  Download as DownloadIcon,
+  DeleteOutline as DeleteOutlineIcon,
+  PhotoSizeSelectActual as PhotoIcon
 } from '@mui/icons-material';
 
 interface RatioPreset {
@@ -54,7 +55,16 @@ const AspectRatioCalculator = () => {
   const [pixelW, setPixelW] = useState<number>(1920);
   const [pixelH, setPixelH] = useState<number>(1080);
 
+  const [loadedImage, setLoadedImage] = useState<{
+    file: File;
+    url: string;
+    origW: number;
+    origH: number;
+    name: string;
+  } | null>(null);
+
   const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle Width change -> recalculate Height
   const handleWidthChange = (newW: number) => {
@@ -86,7 +96,7 @@ const AspectRatioCalculator = () => {
     setRatioH(preset.hRatio);
     const newH = Math.round((pixelW * preset.hRatio) / preset.wRatio);
     setPixelH(newH);
-    setToast({ open: true, message: `Proporción ${preset.name} aplicada` });
+    setToast({ open: true, message: `Proporcion ${preset.name} aplicada` });
   };
 
   const handleSwapDimensions = () => {
@@ -102,10 +112,90 @@ const AspectRatioCalculator = () => {
     setToast({ open: true, message: 'Dimensiones invertidas' });
   };
 
+  const handleImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setToast({ open: true, message: 'El archivo debe ser una imagen' });
+      return;
+    }
+    const imgUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const natW = img.naturalWidth;
+      const natH = img.naturalHeight;
+      const divisor = gcd(natW, natH);
+      const simpW = natW / divisor;
+      const simpH = natH / divisor;
+
+      setRatioW(simpW);
+      setRatioH(simpH);
+      setPixelW(natW);
+      setPixelH(natH);
+
+      setLoadedImage({
+        file,
+        url: imgUrl,
+        origW: natW,
+        origH: natH,
+        name: file.name
+      });
+
+      setToast({ open: true, message: `Imagen cargada: ${natW}×${natH} px (Ratio ${simpW}:${simpH})` });
+    };
+    img.src = imgUrl;
+  };
+
+  const handleScalePercent = (percent: number) => {
+    if (!loadedImage) return;
+    const newW = Math.round((loadedImage.origW * percent) / 100);
+    const newH = Math.round((loadedImage.origH * percent) / 100);
+    setPixelW(newW);
+    setPixelH(newH);
+    setToast({ open: true, message: `Escala al ${percent}% aplicada (${newW}×${newH} px)` });
+  };
+
+  const handleDownloadScaledImage = () => {
+    if (!loadedImage) return;
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = pixelW;
+      canvas.height = pixelH;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, pixelW, pixelH);
+
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const extMatch = loadedImage.name.lastIndexOf('.');
+        const baseName = extMatch > -1 ? loadedImage.name.substring(0, extMatch) : loadedImage.name;
+        a.download = `${baseName}_${pixelW}x${pixelH}.png`;
+        a.href = url;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        setToast({ open: true, message: `Imagen descargada en ${pixelW}×${pixelH} px` });
+      }, 'image/png');
+    };
+    img.src = loadedImage.url;
+  };
+
+  const handleClearImage = () => {
+    if (loadedImage?.url) {
+      URL.revokeObjectURL(loadedImage.url);
+    }
+    setLoadedImage(null);
+    setToast({ open: true, message: 'Imagen removida' });
+  };
+
   const copyDimensions = () => {
     const text = `${pixelW}x${pixelH}px`;
     navigator.clipboard.writeText(text);
-    setToast({ open: true, message: `¡${text} copiado al portapapeles!` });
+    setToast({ open: true, message: `${text} copiado al portapapeles` });
   };
 
   return (
@@ -139,9 +229,128 @@ const AspectRatioCalculator = () => {
               borderColor: 'rgba(255, 255, 255, 0.08)'
             }}
           >
+            {/* Image Dropzone & Auto Detection */}
+            <Box sx={{ mb: 3 }}>
+              <input
+                id="aspect-ratio-file-input"
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageFile(file);
+                }}
+              />
+
+              {!loadedImage ? (
+                <Paper
+                  variant="outlined"
+                  onClick={() => fileInputRef.current?.click()}
+                  sx={{
+                    p: 2.5,
+                    textAlign: 'center',
+                    borderStyle: 'dashed',
+                    borderWidth: 2,
+                    borderColor: 'rgba(255, 255, 255, 0.15)',
+                    bgcolor: 'rgba(255, 255, 255, 0.02)',
+                    cursor: 'pointer',
+                    borderRadius: 2,
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      borderColor: 'primary.main',
+                      bgcolor: 'rgba(59, 130, 246, 0.06)'
+                    }
+                  }}
+                >
+                  <UploadFileIcon sx={{ fontSize: 32, color: 'primary.main', mb: 0.5 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    Arrastra una imagen o haz clic para detectar su relación de aspecto
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Calcula automáticamente la proporción original y permite redimensionar en un clic
+                  </Typography>
+                </Paper>
+              ) : (
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    bgcolor: 'rgba(59, 130, 246, 0.08)',
+                    borderColor: 'primary.main',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+                    alignItems: { xs: 'flex-start', sm: 'center' },
+                    justifyContent: 'space-between',
+                    gap: 1.5
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                    <PhotoIcon color="primary" />
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 700 }}>
+                        {loadedImage.name}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Original: {loadedImage.origW} × {loadedImage.origH} px
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="error"
+                      startIcon={<DeleteOutlineIcon />}
+                      onClick={handleClearImage}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Quitar
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="primary"
+                      startIcon={<DownloadIcon />}
+                      onClick={handleDownloadScaledImage}
+                      sx={{ textTransform: 'none', fontWeight: 700 }}
+                    >
+                      Descargar ({pixelW}×{pixelH})
+                    </Button>
+                  </Box>
+                </Paper>
+              )}
+            </Box>
+
+            {/* Quick Percentage Scaling when image loaded */}
+            {loadedImage && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1, fontWeight: 700 }}>
+                  Escala Rápida Proporcional:
+                </Typography>
+                <ButtonGroup size="small" variant="outlined" sx={{ flexWrap: 'wrap' }}>
+                  {[25, 50, 75, 100, 150, 200].map((pct) => (
+                    <Button
+                      key={pct}
+                      onClick={() => handleScalePercent(pct)}
+                      sx={{
+                        fontWeight: pixelW === Math.round((loadedImage.origW * pct) / 100) ? 800 : 500,
+                        bgcolor: pixelW === Math.round((loadedImage.origW * pct) / 100) ? 'primary.main' : 'transparent',
+                        color: pixelW === Math.round((loadedImage.origW * pct) / 100) ? '#fff' : 'inherit',
+                      }}
+                    >
+                      {pct}%
+                    </Button>
+                  ))}
+                </ButtonGroup>
+              </Box>
+            )}
+
             {/* Presets */}
             <Typography variant="subtitle2" color="primary" sx={{ fontWeight: 700, mb: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <MagicIcon fontSize="small" /> Relaciones de Aspecto Populares
+              <CropSquareIcon fontSize="small" /> Relaciones de Aspecto Populares
             </Typography>
             <Grid container spacing={1} sx={{ mb: 3 }}>
               {ratioPresets.map((p, idx) => (
@@ -301,15 +510,57 @@ const AspectRatioCalculator = () => {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    transition: 'all 0.3s ease-out'
+                    transition: 'all 0.3s ease-out',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
                 >
-                  <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main' }}>
-                    {pixelW} × {pixelH} px
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Ratio {calculatedRatioString}
-                  </Typography>
+                  {loadedImage ? (
+                    <>
+                      <Box
+                        component="img"
+                        src={loadedImage.url}
+                        alt="Previsualización"
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          opacity: 0.8
+                        }}
+                      />
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          zIndex: 1,
+                          bgcolor: 'rgba(0, 0, 0, 0.75)',
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: 1.5,
+                          backdropFilter: 'blur(4px)',
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#fff' }}>
+                          {pixelW} × {pixelH} px
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'primary.light' }}>
+                          Ratio {calculatedRatioString}
+                        </Typography>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'primary.main' }}>
+                        {pixelW} × {pixelH} px
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Ratio {calculatedRatioString}
+                      </Typography>
+                    </>
+                  )}
                 </Box>
               </Box>
             </Box>
